@@ -1,18 +1,36 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { Box, Button, Checkbox, IconButton, Typography } from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditIcon from "@mui/icons-material/Edit";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Grid,
+  IconButton,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GoogleLogoutButton from "./components/GoogleLogoutButton";
 import { useAppDispatch, useAppSelector } from "./slices/store";
-import { Todo, editTodoAsync, fetchTodos } from "./slices/todoSlice";
+import {
+  Todo,
+  deleteTodoAsync,
+  editTodoAsync,
+  fetchTodos,
+} from "./slices/todoSlice";
 import { loadUser } from "./slices/userSlice";
 
 export default function TodoPage() {
   const dispatch = useAppDispatch();
   const activeUser = useAppSelector((state) => state.userSlice.activeUser);
   const todos = useAppSelector((state) => state.todoSlice.todos);
-  const [filteredTodos, setFilteredTodos] = useState<Todo[] | []>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedTodo, setEditedTodo] = useState<Todo | null>(null);
+  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
   const [currentStartDate, setCurrentStartDate] = useState<Date>(() =>
     getStartOfWeek(new Date())
   );
@@ -26,42 +44,62 @@ export default function TodoPage() {
     const startDate = getStartOfWeek(new Date());
     setCurrentStartDate(startDate);
     setCurrentEndDate(getEndOfWeek(startDate));
-  }, []);
-
-  useEffect(() => {
-    dispatch(loadUser());
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     if (activeUser) {
       dispatch(fetchTodos(activeUser.accountId));
     }
-  }, [activeUser]);
+  }, [activeUser, dispatch]);
 
   useEffect(() => {
     if (todos) {
-      console.log("Startdatum:", currentStartDate);
-      console.log("Slutdatum:", currentEndDate);
-
-      const filteredTodos = todos.filter((todo) => {
-        const todoDate = new Date(todo.date);
-        const endDateAdjusted = new Date(currentEndDate);
-        endDateAdjusted.setHours(23, 59, 59, 999);
-        return todoDate >= currentStartDate && todoDate <= endDateAdjusted;
-      });
-      setFilteredTodos(filteredTodos);
-      console.log("FILTRERADE: ", filteredTodos);
+      filterTodosByDateRange(todos, currentStartDate, currentEndDate);
     }
   }, [todos, currentStartDate, currentEndDate]);
+
+  const filterTodosByDateRange = (
+    todos: Todo[],
+    startDate: Date,
+    endDate: Date
+  ) => {
+    const filtered = todos.filter((todo) => {
+      const todoDate = new Date(todo.date);
+      return todoDate >= startDate && todoDate <= endDate;
+    });
+    setFilteredTodos(filtered);
+  };
 
   const handleTodoToggle = (id: string) => {
     const todoToggled = todos.find((t) => t.id === id);
     if (todoToggled) {
-      const updatedTodo = {
-        ...todoToggled,
-        isDone: !todoToggled.isDone,
+      const updatedTodo = { ...todoToggled, isDone: !todoToggled.isDone };
+      dispatch(editTodoAsync(updatedTodo));
+    }
+  };
+
+  const handleSetEditMode = (todo: Todo) => {
+    setEditedTodo(todo);
+    setIsEditMode(true);
+  };
+
+  const handleEditTodo = () => {
+    if (editedTodo) {
+      const updatedTodo: Todo = {
+        ...editedTodo,
+        title: editedTodo.title,
+        date: new Date(editedTodo.date),
       };
       dispatch(editTodoAsync(updatedTodo));
+      setIsEditMode(false);
+      setEditedTodo(null);
+    }
+  };
+
+  const handleDeleteTodo = (id: string) => {
+    const todoToDelete = todos.find((t) => t.id === id);
+    if (todoToDelete) {
+      dispatch(deleteTodoAsync(todoToDelete.id));
     }
   };
 
@@ -79,26 +117,40 @@ export default function TodoPage() {
     setCurrentEndDate(getEndOfWeek(updatedStartDate));
   };
 
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+    setEditedTodo(null);
+  };
+
   return (
     <Box
       sx={{
         backgroundColor: "#f0f0f0",
         minHeight: "100vh",
+        padding: "20px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: "20px",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <Typography>Inloggad som {activeUser?.name}</Typography>
-        <GoogleLogoutButton />
-      </Box>
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          marginBottom: "20px",
+        }}
+      >
+        <Typography variant="h6">Inloggad som {activeUser?.name}</Typography>
+        <GoogleLogoutButton />
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           width: "100%",
           marginBottom: "20px",
         }}
@@ -115,69 +167,156 @@ export default function TodoPage() {
         </IconButton>
       </Box>
 
-      <Box sx={{ backgroundColor: "pink" }}>
-        <Button variant="contained" onClick={() => navigate("/addtodo")}>
-          Lägg till
-        </Button>
-      </Box>
+      <Button
+        variant="contained"
+        onClick={() => navigate("/addtodo")}
+        sx={{ marginBottom: "10px" }}
+      >
+        Lägg till
+      </Button>
 
-      {/* Todos */}
-      <Box sx={{ width: "100%", maxWidth: "600px" }}>
+      <Grid container spacing={2} justifyContent="center">
         {filteredTodos.map((todo) => (
-          <Box
-            key={todo.id}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              backgroundColor: "white",
-              padding: "10px",
-              borderRadius: "8px",
-              marginBottom: "10px",
-              textDecoration: todo.isDone ? "line-through" : "none",
-            }}
-          >
-            <Checkbox
-              checked={todo.isDone}
-              onChange={() => handleTodoToggle(todo.id)}
-              sx={{ marginRight: "10px" }}
-            />
-            <Typography sx={{ flexGrow: 1 }}>{todo.title}</Typography>
-          </Box>
+          <Grid item xs={12} key={todo.id}>
+            <Paper
+              elevation={3}
+              sx={{
+                padding: "10px",
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "white",
+              }}
+            >
+              <Checkbox
+                checked={todo.isDone}
+                onChange={() => handleTodoToggle(todo.id)}
+                sx={{ marginRight: "10px" }}
+              />
+
+              {!isEditMode || editedTodo?.id !== todo.id ? (
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      textDecoration: todo.isDone ? "line-through" : "none",
+                    }}
+                  >
+                    {todo.title}
+                  </Typography>
+                  <Typography variant="caption">
+                    Datum: {formatDate(new Date(todo.date))}
+                  </Typography>
+                </Box>
+              ) : (
+                <>
+                  <TextField
+                    variant="outlined"
+                    type="text"
+                    value={editedTodo?.title}
+                    onChange={(e) =>
+                      setEditedTodo({ ...editedTodo, title: e.target.value })
+                    }
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "grey",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "grey",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "grey",
+                        },
+                      },
+                    }}
+                  />
+                  <TextField
+                    label="Datum"
+                    type="datetime-local"
+                    value={editedTodo.date}
+                    onChange={(e) =>
+                      setEditedTodo({
+                        ...editedTodo,
+                        date: new Date(e.target.value),
+                      })
+                    }
+                    variant="outlined"
+                    sx={{
+                      width: "250px",
+                      marginTop: 2,
+                      "& label": {
+                        color: "transparent",
+                      },
+                      "&:focus label": {
+                        color: "initial",
+                      },
+                    }}
+                  />
+                </>
+              )}
+
+              {!isEditMode || editedTodo?.id !== todo.id ? (
+                <Box sx={{ display: "flex", gap: "10px" }}>
+                  <IconButton onClick={() => handleSetEditMode(todo)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton onClick={() => handleDeleteTodo(todo.id)}>
+                    <DeleteOutlineIcon />
+                  </IconButton>
+                </Box>
+              ) : (
+                <Box sx={{ display: "flex", gap: "10px" }}>
+                  <Button
+                    variant="contained"
+                    onClick={handleEditTodo}
+                    sx={{ marginRight: "10px" }}
+                  >
+                    Uppdatera
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={handleCancelEdit}
+                    sx={{ color: "red" }}
+                  >
+                    Avbryt
+                  </Button>
+                </Box>
+              )}
+            </Paper>
+          </Grid>
         ))}
-      </Box>
+      </Grid>
     </Box>
   );
 }
 
-// Funktion för att få veckonumret
 const getWeekNumber = (date: Date) => {
   const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
   const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
   return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
 };
 
-// Funktion för att formatera datum
 const formatDate = (date: Date) => {
   return date.toLocaleDateString("sv-SE", {
     day: "numeric",
     month: "long",
+    year: "numeric",
   });
 };
 
-// Funktion för att få startdatumet för en vecka (måndag)
 const getStartOfWeek = (date: Date) => {
   const startOfWeek = new Date(date);
   const day = startOfWeek.getDay();
-  const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Justera om söndag
+  const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
   startOfWeek.setDate(diff);
-  startOfWeek.setHours(0, 0, 0, 0); // Nollställ tid för konsistens
+  startOfWeek.setHours(0, 0, 0, 0);
   return startOfWeek;
 };
 
-// Funktion för att få slutdatumet för en vecka (söndag)
 const getEndOfWeek = (date: Date) => {
   const endOfWeek = new Date(getStartOfWeek(date));
   endOfWeek.setDate(endOfWeek.getDate() + 6);
-  endOfWeek.setHours(23, 59, 59, 999); // Sätt tid till slutet av dagen för konsistens
+  endOfWeek.setHours(23, 59, 59, 999);
   return endOfWeek;
 };

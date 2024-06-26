@@ -1,15 +1,15 @@
+import React, { useEffect, useState } from "react";
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "./slices/store";
 import { Todo, addTodoAsync } from "./slices/todoSlice";
 import { loadUser } from "./slices/userSlice";
 
-export default function Add() {
+const Add = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
-  const [desciption, setDescription] = useState("");
+  const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const activeUser = useAppSelector((state) => state.userSlice.activeUser);
 
@@ -18,11 +18,11 @@ export default function Add() {
   }, []);
 
   const addTodo = () => {
-    if (title != "" && date != "" && activeUser) {
+    if (title !== "" && date !== "" && activeUser) {
       const todo: Todo = {
         id: "undefined",
         title: title,
-        description: desciption,
+        description: description,
         date: new Date(date),
         isDone: false,
         accountId: activeUser.accountId,
@@ -31,6 +31,7 @@ export default function Add() {
       navigate("/todo");
     }
   };
+
   return (
     <Box
       sx={{
@@ -53,7 +54,16 @@ export default function Add() {
       >
         <Typography variant="h4">Lägg till ny todo</Typography>
       </Box>
-      <Box sx={{ backgroundColor: "grey", padding: 5 }}>
+      <Box
+        sx={{
+          backgroundColor: "white",
+          padding: "20px",
+          borderRadius: "8px",
+          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+          width: "100%",
+          maxWidth: "400px",
+        }}
+      >
         <TextField
           label="Vad ska du göra?"
           variant="outlined"
@@ -62,61 +72,42 @@ export default function Add() {
           onChange={(event) => setTitle(event.target.value)}
           fullWidth
           sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: "grey",
-              },
-              "&:hover fieldset": {
-                borderColor: "grey",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "grey",
-              },
-            },
+            marginBottom: "15px",
           }}
         />
         <TextField
           label="Beskriv mer"
           variant="outlined"
           type="text"
-          value={desciption}
+          value={description}
           onChange={(event) => setDescription(event.target.value)}
           fullWidth
           sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: "grey",
-              },
-              "&:hover fieldset": {
-                borderColor: "grey",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "grey",
-              },
-            },
+            marginBottom: "15px",
           }}
         />
         <TextField
-          label="Datum"
+          label=""
           type="datetime-local"
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(event) => setDate(event.target.value)}
           variant="outlined"
+          fullWidth
           sx={{
-            width: "250px",
-            marginTop: 2,
-            "& label": {
-              color: "transparent",
-            },
-            "&:focus label": {
-              color: "initial",
-            },
+            marginBottom: "15px",
           }}
         />
-        <Button variant="contained" onClick={() => addTodo()}>
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          onClick={() => addTodo()}
+        >
           Lägg till
         </Button>
       </Box>
     </Box>
   );
-}
+};
+
+export default Add;
