@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GoogleLogoutButton from "./components/GoogleLogoutButton";
 import { useAppDispatch, useAppSelector } from "./slices/store";
-import { Todo, fetchTodos } from "./slices/todoSlice";
+import { Todo, editTodoAsync, fetchTodos } from "./slices/todoSlice";
 import { loadUser } from "./slices/userSlice";
 
 export default function TodoPage() {
@@ -43,27 +43,25 @@ export default function TodoPage() {
       console.log("Startdatum:", currentStartDate);
       console.log("Slutdatum:", currentEndDate);
 
-      // Filtrera todos baserat på datumintervall
       const filteredTodos = todos.filter((todo) => {
         const todoDate = new Date(todo.date);
-        // Justera slutdatum för att inkludera hela dagen
         const endDateAdjusted = new Date(currentEndDate);
         endDateAdjusted.setHours(23, 59, 59, 999);
         return todoDate >= currentStartDate && todoDate <= endDateAdjusted;
       });
-
-      // Uppdatera state med filtrerade todos
       setFilteredTodos(filteredTodos);
-      console.log("FILTRERADE: ", filteredTodos); // Placera loggen här för att kontrollera resultatet
+      console.log("FILTRERADE: ", filteredTodos);
     }
   }, [todos, currentStartDate, currentEndDate]);
 
   const handleTodoToggle = (id: string) => {
     const todoToggled = todos.find((t) => t.id === id);
     if (todoToggled) {
-      todoToggled.isDone = !todoToggled.isDone;
-      // uppdatera statet
-      console.log("todo är: ", todoToggled.isDone);
+      const updatedTodo = {
+        ...todoToggled,
+        isDone: !todoToggled.isDone,
+      };
+      dispatch(editTodoAsync(updatedTodo));
     }
   };
 
