@@ -70,7 +70,10 @@ export const getTodosFromDB = async (accountId: string) => {
     const todos: Todo[] = [];
 
     querySnapshot.forEach((doc) => {
-      todos.push(doc.data() as Todo);
+      const todoData = doc.data();
+      const todoDate = todoData.date.toDate();
+      todoData.date = todoDate;
+      todos.push(todoData as Todo);
     });
 
     return todos;

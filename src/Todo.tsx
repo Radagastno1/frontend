@@ -3,10 +3,16 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Box, Button, Checkbox, IconButton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppSelector } from "./slices/store";
+import GoogleLogoutButton from "./components/GoogleLogoutButton";
+import { useAppDispatch, useAppSelector } from "./slices/store";
+import { Todo, fetchTodos } from "./slices/todoSlice";
+import { loadUser } from "./slices/userSlice";
 
-export default function Todo() {
+export default function TodoPage() {
+  const dispatch = useAppDispatch();
+  const activeUser = useAppSelector((state) => state.userSlice.activeUser);
   const todos = useAppSelector((state) => state.todoSlice.todos);
+  const [filteredTodos, setFilteredTodos] = useState<Todo[] | []>([]);
   const [currentStartDate, setCurrentStartDate] = useState<Date>(() =>
     getStartOfWeek(new Date())
   );
@@ -16,10 +22,41 @@ export default function Todo() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    dispatch(loadUser());
     const startDate = getStartOfWeek(new Date());
     setCurrentStartDate(startDate);
     setCurrentEndDate(getEndOfWeek(startDate));
   }, []);
+
+  useEffect(() => {
+    dispatch(loadUser());
+  }, []);
+
+  useEffect(() => {
+    if (activeUser) {
+      dispatch(fetchTodos(activeUser.accountId));
+    }
+  }, [activeUser]);
+
+  useEffect(() => {
+    if (todos) {
+      console.log("Startdatum:", currentStartDate);
+      console.log("Slutdatum:", currentEndDate);
+
+      // Filtrera todos baserat på datumintervall
+      const filteredTodos = todos.filter((todo) => {
+        const todoDate = new Date(todo.date);
+        // Justera slutdatum för att inkludera hela dagen
+        const endDateAdjusted = new Date(currentEndDate);
+        endDateAdjusted.setHours(23, 59, 59, 999);
+        return todoDate >= currentStartDate && todoDate <= endDateAdjusted;
+      });
+
+      // Uppdatera state med filtrerade todos
+      setFilteredTodos(filteredTodos);
+      console.log("FILTRERADE: ", filteredTodos); // Placera loggen här för att kontrollera resultatet
+    }
+  }, [todos, currentStartDate, currentEndDate]);
 
   const handleTodoToggle = (id: string) => {
     const todoToggled = todos.find((t) => t.id === id);
@@ -55,6 +92,10 @@ export default function Todo() {
         padding: "20px",
       }}
     >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <Typography>Inloggad som {activeUser?.name}</Typography>
+        <GoogleLogoutButton />
+      </Box>
       <Box
         sx={{
           display: "flex",
@@ -84,7 +125,7 @@ export default function Todo() {
 
       {/* Todos */}
       <Box sx={{ width: "100%", maxWidth: "600px" }}>
-        {todos.map((todo) => (
+        {filteredTodos.map((todo) => (
           <Box
             key={todo.id}
             sx={{

@@ -1,8 +1,9 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "./slices/store";
+import { useAppDispatch, useAppSelector } from "./slices/store";
 import { Todo, addTodoAsync } from "./slices/todoSlice";
+import { loadUser } from "./slices/userSlice";
 
 export default function Add() {
   const dispatch = useAppDispatch();
@@ -10,16 +11,21 @@ export default function Add() {
   const [title, setTitle] = useState("");
   const [desciption, setDescription] = useState("");
   const [date, setDate] = useState("");
+  const activeUser = useAppSelector((state) => state.userSlice.activeUser);
+
+  useEffect(() => {
+    dispatch(loadUser());
+  }, []);
 
   const addTodo = () => {
-    if (title != "" && date != "") {
+    if (title != "" && date != "" && activeUser) {
       const todo: Todo = {
         id: "undefined",
         title: title,
         description: desciption,
         date: new Date(date),
         isDone: false,
-        accountId: "123",
+        accountId: activeUser.accountId,
       };
       dispatch(addTodoAsync(todo));
       navigate("/todo");
@@ -52,7 +58,7 @@ export default function Add() {
           label="Vad ska du göra?"
           variant="outlined"
           type="text"
-          value={name}
+          value={title}
           onChange={(event) => setTitle(event.target.value)}
           fullWidth
           sx={{
@@ -73,7 +79,7 @@ export default function Add() {
           label="Beskriv mer"
           variant="outlined"
           type="text"
-          value={name}
+          value={desciption}
           onChange={(event) => setDescription(event.target.value)}
           fullWidth
           sx={{

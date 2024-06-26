@@ -30,6 +30,11 @@ export const initialState: TodoState = {
   error: null,
 };
 
+const loadTodosFromLocalStorage = (): Todo[] => {
+  const todosData = localStorage.getItem("todos");
+  return todosData ? JSON.parse(todosData) : [];
+};
+
 export const deleteTodoAsync = createAsyncThunk<
   string,
   string,
@@ -84,6 +89,9 @@ const TodoSlice = createSlice({
     setTodos: (state, action) => {
       state.todos = action.payload;
     },
+    loadTodos: (state) => {
+      state.todos = loadTodosFromLocalStorage();
+    },
     findTodoById: (state, action: PayloadAction<{ TodoId: string }>) => {
       const { TodoId } = action.payload;
       const foundTodo = state.todos.find((todo) => todo.id === TodoId);
@@ -137,5 +145,6 @@ export const fetchTodos =
     dispatch(TodoSlice.actions.setTodos(todos));
   };
 
+export const { loadTodos, setTodos } = TodoSlice.actions;
 export const TodoReducer = TodoSlice.reducer;
 export type { TodoState };
