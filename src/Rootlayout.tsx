@@ -40,7 +40,7 @@ const RootLayout = () => {
             marginX: "20px"
           }}
         >
-          <Typography sx={{color: "black"}}variant="h6">Inloggad som {activeUser?.name}</Typography>
+          <Typography sx={{color: "black", fontSize: {xs: 16, md: 22, }}}>Inloggad som {activeUser?.name}</Typography>
           <GoogleLogoutButton />
         </Box>
 
@@ -48,6 +48,7 @@ const RootLayout = () => {
 
       <main
         style={{
+          backgroundColor: "white",
           width: "100%",
           height: "100vh",
           display: "flex",

@@ -30,6 +30,7 @@ export default function TodoPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedTodo, setEditedTodo] = useState<Todo | null>(null);
   const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
+  const [finishedTodos, setFinishedTodos] = useState<Todo[]>([]);
   const [currentStartDate, setCurrentStartDate] = useState<Date>(() =>
     getStartOfWeek(new Date())
   );
@@ -66,7 +67,10 @@ export default function TodoPage() {
       const todoDate = new Date(todo.date);
       return todoDate >= startDate && todoDate <= endDate;
     });
-    setFilteredTodos(filtered);
+    const finishedTodos = filtered.filter(t => t.isDone == true);
+    setFinishedTodos(finishedTodos);
+    const unFinishedTodos = filtered.filter(t => t.isDone == false);
+    setFilteredTodos(unFinishedTodos);
   };
 
   const handleTodoToggle = (id: string) => {
@@ -124,7 +128,6 @@ export default function TodoPage() {
   return (
     <Box
       sx={{
-        backgroundColor: "#f0f0f0",
         minHeight: "100vh",
         padding: "20px",
         display: "flex",
@@ -161,7 +164,9 @@ export default function TodoPage() {
         Lägg till
       </Button>
 
-      <Grid container spacing={2} justifyContent="center">
+      <Box sx={{display: "flex", flexDirection: "row", width: "100%"}}>
+
+      <Grid sx={{backgroundColor: "white"}} container spacing={2} justifyContent="center">
         {filteredTodos.map((todo) => (
           <Grid item xs={12} key={todo.id}>
             <Paper
@@ -171,6 +176,8 @@ export default function TodoPage() {
                 display: "flex",
                 alignItems: "center",
                 backgroundColor: "white",
+                width: "45%"
+
               }}
             >
               <Checkbox
@@ -273,6 +280,47 @@ export default function TodoPage() {
           </Grid>
         ))}
       </Grid>
+
+
+
+      <Grid sx={{backgroundColor: "white"}} container spacing={2} justifyContent="center">
+        {finishedTodos.map((todo) => (
+          <Grid item xs={12} key={todo.id}>
+            <Paper
+              elevation={3}
+              sx={{
+                padding: "10px",
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "white",
+                width: "45%"
+
+              }}
+            >
+              <Checkbox
+                checked={todo.isDone}
+                onChange={() => handleTodoToggle(todo.id)}
+                sx={{ marginRight: "10px" }}
+              />
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      textDecoration: todo.isDone ? "line-through" : "none",
+                    }}
+                  >
+                    {todo.title}
+                  </Typography>
+                  <Typography variant="caption">
+                    Datum: {formatDate(new Date(todo.date))}
+                  </Typography>
+                </Box>
+
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+      </Box>
     </Box>
   );
 }
