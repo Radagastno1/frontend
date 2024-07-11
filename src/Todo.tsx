@@ -14,7 +14,6 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import GoogleLogoutButton from "./components/GoogleLogoutButton";
 import { useAppDispatch, useAppSelector } from "./slices/store";
 import {
   Todo,
@@ -133,19 +132,6 @@ export default function TodoPage() {
         alignItems: "center",
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "100%",
-          marginBottom: "20px",
-        }}
-      >
-        <Typography variant="h6">Inloggad som {activeUser?.name}</Typography>
-        <GoogleLogoutButton />
-      </Box>
-
       <Box
         sx={{
           display: "flex",
