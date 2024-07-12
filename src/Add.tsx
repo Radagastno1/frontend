@@ -35,7 +35,6 @@ const Add = () => {
   return (
     <Box
       sx={{
-        backgroundColor: "#f0f0f0",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -46,10 +45,11 @@ const Add = () => {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
           width: "100%",
-          marginBottom: "20px",
+          margin: "40px",
+
         }}
       >
         <Typography variant="h4">Lägg till ny todo</Typography>
@@ -57,11 +57,16 @@ const Add = () => {
       <Box
         sx={{
           backgroundColor: "white",
-          padding: "20px",
+          padding: "50px",
           borderRadius: "8px",
-          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+          border: "2px solid rgba(0.3, 0.5, 0, 0.7)",
           width: "100%",
-          maxWidth: "400px",
+          height: "100%",
+          maxWidth: "600px",
+          maxHeight: "600px",
+          boxShadow: "4"
+          
+
         }}
       >
         <TextField
@@ -99,7 +104,7 @@ const Add = () => {
         />
         <Button
           variant="contained"
-          color="primary"
+          color="success"
           fullWidth
           onClick={() => addTodo()}
         >

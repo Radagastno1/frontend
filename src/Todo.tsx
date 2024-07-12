@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Grid,
   IconButton,
   Paper,
   TextField,
@@ -30,6 +29,7 @@ export default function TodoPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedTodo, setEditedTodo] = useState<Todo | null>(null);
   const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
+  const [finishedTodos, setFinishedTodos] = useState<Todo[]>([]);
   const [currentStartDate, setCurrentStartDate] = useState<Date>(() =>
     getStartOfWeek(new Date())
   );
@@ -66,7 +66,10 @@ export default function TodoPage() {
       const todoDate = new Date(todo.date);
       return todoDate >= startDate && todoDate <= endDate;
     });
-    setFilteredTodos(filtered);
+    const finishedTodos = filtered.filter((t) => t.isDone == true);
+    setFinishedTodos(finishedTodos);
+    const unFinishedTodos = filtered.filter((t) => t.isDone == false);
+    setFilteredTodos(unFinishedTodos);
   };
 
   const handleTodoToggle = (id: string) => {
@@ -124,27 +127,29 @@ export default function TodoPage() {
   return (
     <Box
       sx={{
-        backgroundColor: "#f0f0f0",
         minHeight: "100vh",
         padding: "20px",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        backgroundColor: "white",
       }}
     >
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
+          justifyContent: "center",
           width: "100%",
           marginBottom: "20px",
+          backgroundColor: "white",
+          height: "100%",
+          border: "2px solid black",
         }}
       >
         <IconButton onClick={updateWeekBackwards}>
           <ChevronLeftIcon />
         </IconButton>
-        <Typography variant="h4">
+        <Typography sx={{fontSize:{xs:14, md:26}}}>
           Vecka {getWeekNumber(currentStartDate)} (
           {formatDate(currentStartDate)} - {formatDate(currentEndDate)})
         </Typography>
@@ -153,33 +158,210 @@ export default function TodoPage() {
         </IconButton>
       </Box>
 
-      <Button
-        variant="contained"
-        onClick={() => navigate("/addtodo")}
-        sx={{ marginBottom: "10px" }}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: {xs:"column", md:"row"},
+          height: "100vh",
+          justifyContent: "space-between",
+          // marginX: 2,
+        }}
       >
-        Lägg till
-      </Button>
-
-      <Grid container spacing={2} justifyContent="center">
-        {filteredTodos.map((todo) => (
-          <Grid item xs={12} key={todo.id}>
-            <Paper
-              elevation={3}
+        <Box
+          sx={{
+            backgroundColor: "white",
+            width: {xs:"100%", md:"45%"},
+            border: "2px solid black",
+            spacing: "2"
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              backgroundColor: "white",
+            }}
+          >
+            <Button
+              variant="contained"
+              onClick={() => navigate("/addtodo")}
               sx={{
-                padding: "10px",
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "white",
+                marginY: "30px",
+                justifyContent: "center",
               }}
             >
-              <Checkbox
-                checked={todo.isDone}
-                onChange={() => handleTodoToggle(todo.id)}
-                sx={{ marginRight: "10px" }}
-              />
+              Lägg till
+            </Button>
+          </Box>
+          {filteredTodos.map((todo) => (
+            <Box
+              sx={{
+                marginY: 2,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+              component="div"
+              key={todo.id}
+            >
+              <Paper
+                elevation={3}
+                sx={{
+                  padding: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  width: "45%",
+                  justifyContent: "center",
+                }}
+              >
+                <Checkbox
+                  checked={todo.isDone}
+                  onChange={() => handleTodoToggle(todo.id)}
+                  sx={{ marginRight: "10px" }}
+                />
 
-              {!isEditMode || editedTodo?.id !== todo.id ? (
+                {!isEditMode || editedTodo?.id !== todo.id ? (
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        textDecoration: todo.isDone ? "line-through" : "none",
+                      }}
+                    >
+                      {todo.title}
+                    </Typography>
+                    <Typography variant="caption">
+                      Datum: {formatDate(new Date(todo.date))}
+                    </Typography>
+                  </Box>
+                ) : (
+                  <>
+                    <TextField
+                      variant="outlined"
+                      type="text"
+                      value={editedTodo?.title}
+                      onChange={(e) =>
+                        setEditedTodo({ ...editedTodo, title: e.target.value })
+                      }
+                      fullWidth
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          "& fieldset": {
+                            borderColor: "grey",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "grey",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "grey",
+                          },
+                        },
+                      }}
+                    />
+                    <TextField
+                      label="Datum"
+                      type="datetime-local"
+                      value={editedTodo.date}
+                      onChange={(e) =>
+                        setEditedTodo({
+                          ...editedTodo,
+                          date: new Date(e.target.value),
+                        })
+                      }
+                      variant="outlined"
+                      sx={{
+                        width: "250px",
+                        marginTop: 2,
+                        "& label": {
+                          color: "transparent",
+                        },
+                        "&:focus label": {
+                          color: "initial",
+                        },
+                      }}
+                    />
+                  </>
+                )}
+
+                {!isEditMode || editedTodo?.id !== todo.id ? (
+                  <Box sx={{ display: "flex", gap: "10px" }}>
+                    <IconButton onClick={() => handleSetEditMode(todo)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton onClick={() => handleDeleteTodo(todo.id)}>
+                      <DeleteOutlineIcon />
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: "flex", gap: "10px" }}>
+                    <Button
+                      variant="contained"
+                      onClick={handleEditTodo}
+                      sx={{ marginRight: "10px" }}
+                    >
+                      Uppdatera
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={handleCancelEdit}
+                      sx={{ color: "red" }}
+                    >
+                      Avbryt
+                    </Button>
+                  </Box>
+                )}
+              </Paper>
+            </Box>
+          ))}
+        </Box>
+
+        {/* <Box sx={{ backgroundColor: "black", height: "100", width: "2px" }} /> */}
+        <Box
+          sx={{
+            backgroundColor: "white",
+            width: {xs:"100%", md:"45%"},
+            display: "flex",
+            flexDirection: "column",
+            border: "2px solid black",
+            alignContent: "flex-end",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Typography sx={{ fontSize: 26, paddingY: 4 }}>
+              Avklarade
+            </Typography>
+          </Box>
+          {finishedTodos.map((todo) => (
+            <Box
+              sx={{
+                marginY: 2,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+              component="div"
+              key={todo.id}
+            >
+              <Paper
+                elevation={3}
+                sx={{
+                  padding: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  backgroundColor: "white",
+                  width: "45%",
+                }}
+              >
+                <Checkbox
+                  checked={todo.isDone}
+                  onChange={() => handleTodoToggle(todo.id)}
+                  sx={{ marginRight: "10px" }}
+                />
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography
                     variant="body1"
@@ -193,86 +375,11 @@ export default function TodoPage() {
                     Datum: {formatDate(new Date(todo.date))}
                   </Typography>
                 </Box>
-              ) : (
-                <>
-                  <TextField
-                    variant="outlined"
-                    type="text"
-                    value={editedTodo?.title}
-                    onChange={(e) =>
-                      setEditedTodo({ ...editedTodo, title: e.target.value })
-                    }
-                    fullWidth
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": {
-                          borderColor: "grey",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "grey",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "grey",
-                        },
-                      },
-                    }}
-                  />
-                  <TextField
-                    label="Datum"
-                    type="datetime-local"
-                    value={editedTodo.date}
-                    onChange={(e) =>
-                      setEditedTodo({
-                        ...editedTodo,
-                        date: new Date(e.target.value),
-                      })
-                    }
-                    variant="outlined"
-                    sx={{
-                      width: "250px",
-                      marginTop: 2,
-                      "& label": {
-                        color: "transparent",
-                      },
-                      "&:focus label": {
-                        color: "initial",
-                      },
-                    }}
-                  />
-                </>
-              )}
-
-              {!isEditMode || editedTodo?.id !== todo.id ? (
-                <Box sx={{ display: "flex", gap: "10px" }}>
-                  <IconButton onClick={() => handleSetEditMode(todo)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton onClick={() => handleDeleteTodo(todo.id)}>
-                    <DeleteOutlineIcon />
-                  </IconButton>
-                </Box>
-              ) : (
-                <Box sx={{ display: "flex", gap: "10px" }}>
-                  <Button
-                    variant="contained"
-                    onClick={handleEditTodo}
-                    sx={{ marginRight: "10px" }}
-                  >
-                    Uppdatera
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={handleCancelEdit}
-                    sx={{ color: "red" }}
-                  >
-                    Avbryt
-                  </Button>
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
+              </Paper>
+            </Box>
+          ))}
+        </Box>
+      </Box>
     </Box>
   );
 }
