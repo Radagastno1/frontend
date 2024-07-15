@@ -71,8 +71,6 @@ export const getTodosFromDB = async (accountId: string) => {
 
     querySnapshot.forEach((doc) => {
       const todoData = doc.data();
-      const todoDate = todoData.date.toDate();
-      todoData.date = todoDate;
       todos.push(todoData as Todo);
     });
 

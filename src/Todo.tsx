@@ -143,7 +143,6 @@ export default function TodoPage() {
           marginBottom: "20px",
           backgroundColor: "white",
           height: "100%",
-          // border: "2px solid black",
         }}
       >
         <IconButton onClick={updateWeekBackwards}>
@@ -164,7 +163,6 @@ export default function TodoPage() {
           flexDirection: { xs: "column", md: "row" },
           height: "100vh",
           justifyContent: "space-between",
-          // marginX: 2,
         }}
       >
         <Box
@@ -211,7 +209,7 @@ export default function TodoPage() {
                   padding: "10px",
                   display: "flex",
                   alignItems: "center",
-                  width: "45%",
+                  width: "80%",
                   justifyContent: "center",
                 }}
               >
@@ -262,7 +260,7 @@ export default function TodoPage() {
                     <TextField
                       label="Datum"
                       type="datetime-local"
-                      value={new Date(editedTodo.date)}
+                      value={editedTodo.date}
                       onChange={(e) =>
                         setEditedTodo({
                           ...editedTodo,
@@ -283,101 +281,90 @@ export default function TodoPage() {
                     />
                   </>
                 )}
-
-                {!isEditMode || editedTodo?.id !== todo.id ? (
-                  <Box sx={{ display: "flex", gap: "10px" }}>
-                    <IconButton onClick={() => handleSetEditMode(todo)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => handleDeleteTodo(todo.id)}>
-                      <DeleteOutlineIcon />
-                    </IconButton>
-                  </Box>
-                ) : (
-                  <Box sx={{ display: "flex", gap: "10px" }}>
-                    <Button
-                      variant="contained"
-                      onClick={handleEditTodo}
-                      sx={{ marginRight: "10px" }}
-                    >
-                      Uppdatera
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      onClick={handleCancelEdit}
-                      sx={{ color: "red" }}
-                    >
-                      Avbryt
-                    </Button>
-                  </Box>
-                )}
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  {!isEditMode || editedTodo?.id !== todo.id ? (
+                    <>
+                      <IconButton
+                        onClick={() => handleSetEditMode(todo)}
+                        size="small"
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleDeleteTodo(todo.id)}
+                        size="small"
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </>
+                  ) : (
+                    <>
+                      <IconButton
+                        onClick={handleEditTodo}
+                        size="small"
+                        color="primary"
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        onClick={handleCancelEdit}
+                        size="small"
+                        color="secondary"
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </IconButton>
+                    </>
+                  )}
+                </Box>
               </Paper>
             </Box>
           ))}
         </Box>
-
-        {/* <Box sx={{ backgroundColor: "black", height: "100", width: "2px" }} /> */}
         <Box
           sx={{
-            backgroundColor: "white",
             width: { xs: "100%", md: "45%" },
+            height: { xs: "100%", md: "45%" },
+            marginY: { xs: 2, md: 0 },
             display: "flex",
             flexDirection: "column",
-            border: "2px solid #388e3c",
-            alignContent: "flex-end",
+            alignItems: "center",
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Typography sx={{ fontSize: 26, paddingY: 4 }}>
-              Avklarade
-            </Typography>
-          </Box>
+          <Typography variant="h5" sx={{ marginY: 2 }}>
+            Färdiga Att göra
+          </Typography>
           {finishedTodos.map((todo) => (
-            <Box
-              sx={{
-                marginY: 2,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-              component="div"
+            <Paper
               key={todo.id}
+              elevation={3}
+              sx={{
+                padding: "10px",
+                display: "flex",
+                alignItems: "center",
+                width: "80%",
+                marginBottom: 2,
+                justifyContent: "center",
+              }}
             >
-              <Paper
-                elevation={3}
-                sx={{
-                  padding: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  backgroundColor: "white",
-                  width: "45%",
-                }}
-              >
-                <Checkbox
-                  checked={todo.isDone}
-                  onChange={() => handleTodoToggle(todo.id)}
-                  sx={{ marginRight: "10px" }}
-                />
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      textDecoration: todo.isDone ? "line-through" : "none",
-                    }}
-                  >
-                    {todo.title}
-                  </Typography>
-                  <Typography variant="caption">
-                    Datum: {formatDate(new Date(todo.date))}
-                  </Typography>
-                </Box>
-              </Paper>
-            </Box>
+              <Checkbox
+                checked={todo.isDone}
+                onChange={() => handleTodoToggle(todo.id)}
+                sx={{ marginRight: "10px" }}
+              />
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    textDecoration: todo.isDone ? "line-through" : "none",
+                  }}
+                >
+                  {todo.title}
+                </Typography>
+                <Typography variant="caption">
+                  Datum: {formatDate(new Date(todo.date))}
+                </Typography>
+              </Box>
+            </Paper>
           ))}
         </Box>
       </Box>
@@ -385,32 +372,39 @@ export default function TodoPage() {
   );
 }
 
-const getWeekNumber = (date: Date) => {
-  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-  const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
-  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-};
-
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString("sv-SE", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-};
-
-const getStartOfWeek = (date: Date) => {
+// Helper functions
+function getStartOfWeek(date: Date): Date {
   const startOfWeek = new Date(date);
-  const day = startOfWeek.getDay();
-  const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+  const dayOfWeek = startOfWeek.getDay();
+  const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
   startOfWeek.setDate(diff);
   startOfWeek.setHours(0, 0, 0, 0);
   return startOfWeek;
-};
+}
 
-const getEndOfWeek = (date: Date) => {
+function getEndOfWeek(date: Date): Date {
   const endOfWeek = new Date(getStartOfWeek(date));
   endOfWeek.setDate(endOfWeek.getDate() + 6);
   endOfWeek.setHours(23, 59, 59, 999);
   return endOfWeek;
-};
+}
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("sv-SE");
+}
+
+function getWeekNumber(date: Date): number {
+  const tempDate = new Date(date);
+  tempDate.setHours(0, 0, 0, 0);
+  tempDate.setDate(tempDate.getDate() + 3 - ((tempDate.getDay() + 6) % 7));
+  const week1 = new Date(tempDate.getFullYear(), 0, 4);
+  return (
+    1 +
+    Math.round(
+      ((tempDate.getTime() - week1.getTime()) / 86400000 -
+        3 +
+        ((week1.getDay() + 6) % 7)) /
+        7
+    )
+  );
+}
