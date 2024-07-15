@@ -23,7 +23,7 @@ const Add = () => {
         id: "undefined",
         title: title,
         description: description,
-        date: new Date(date),
+        date: date,
         isDone: false,
         accountId: activeUser.accountId,
       };
@@ -49,7 +49,6 @@ const Add = () => {
           alignItems: "center",
           width: "100%",
           margin: "40px",
-
         }}
       >
         <Typography variant="h4">Lägg till ny todo</Typography>
@@ -64,9 +63,7 @@ const Add = () => {
           height: "100%",
           maxWidth: "600px",
           maxHeight: "600px",
-          boxShadow: "4"
-          
-
+          boxShadow: "4",
         }}
       >
         <TextField

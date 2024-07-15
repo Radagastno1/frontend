@@ -90,7 +90,7 @@ export default function TodoPage() {
       const updatedTodo: Todo = {
         ...editedTodo,
         title: editedTodo.title,
-        date: new Date(editedTodo.date),
+        date: editedTodo.date,
       };
       dispatch(editTodoAsync(updatedTodo));
       setIsEditMode(false);
@@ -143,13 +143,13 @@ export default function TodoPage() {
           marginBottom: "20px",
           backgroundColor: "white",
           height: "100%",
-          border: "2px solid black",
+          // border: "2px solid black",
         }}
       >
         <IconButton onClick={updateWeekBackwards}>
           <ChevronLeftIcon />
         </IconButton>
-        <Typography sx={{fontSize:{xs:14, md:26}}}>
+        <Typography sx={{ fontSize: { xs: 14, md: 26 } }}>
           Vecka {getWeekNumber(currentStartDate)} (
           {formatDate(currentStartDate)} - {formatDate(currentEndDate)})
         </Typography>
@@ -161,7 +161,7 @@ export default function TodoPage() {
       <Box
         sx={{
           display: "flex",
-          flexDirection: {xs:"column", md:"row"},
+          flexDirection: { xs: "column", md: "row" },
           height: "100vh",
           justifyContent: "space-between",
           // marginX: 2,
@@ -170,9 +170,9 @@ export default function TodoPage() {
         <Box
           sx={{
             backgroundColor: "white",
-            width: {xs:"100%", md:"45%"},
-            border: "2px solid black",
-            spacing: "2"
+            width: { xs: "100%", md: "45%" },
+            border: "2px solid #1976d2",
+            spacing: "2",
           }}
         >
           <Box
@@ -180,13 +180,14 @@ export default function TodoPage() {
               display: "flex",
               justifyContent: "center",
               backgroundColor: "white",
+              marginY: "30px",
             }}
           >
+            <Typography sx={{ fontSize: 26, marginX: 2 }}>Att göra</Typography>
             <Button
               variant="contained"
               onClick={() => navigate("/addtodo")}
               sx={{
-                marginY: "30px",
                 justifyContent: "center",
               }}
             >
@@ -261,11 +262,11 @@ export default function TodoPage() {
                     <TextField
                       label="Datum"
                       type="datetime-local"
-                      value={editedTodo.date}
+                      value={new Date(editedTodo.date)}
                       onChange={(e) =>
                         setEditedTodo({
                           ...editedTodo,
-                          date: new Date(e.target.value),
+                          date: e.target.value,
                         })
                       }
                       variant="outlined"
@@ -319,10 +320,10 @@ export default function TodoPage() {
         <Box
           sx={{
             backgroundColor: "white",
-            width: {xs:"100%", md:"45%"},
+            width: { xs: "100%", md: "45%" },
             display: "flex",
             flexDirection: "column",
-            border: "2px solid black",
+            border: "2px solid #388e3c",
             alignContent: "flex-end",
           }}
         >
