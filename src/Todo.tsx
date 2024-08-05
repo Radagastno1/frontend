@@ -132,6 +132,8 @@ export default function TodoPage() {
         display: "flex",
         flexDirection: "column",
         backgroundColor: "white",
+        height: "100%",
+        background: "linear-gradient(135deg, #4a90e2, #6d28d9)",
       }}
     >
       <Box
@@ -141,19 +143,20 @@ export default function TodoPage() {
           justifyContent: "center",
           width: "100%",
           marginBottom: "20px",
-          backgroundColor: "white",
+          // backgroundColor: "white",
           height: "100%",
+          color: "white",
         }}
       >
         <IconButton onClick={updateWeekBackwards}>
-          <ChevronLeftIcon />
+          <ChevronLeftIcon sx={{ color: "white" }} />
         </IconButton>
         <Typography sx={{ fontSize: { xs: 14, md: 26 } }}>
           Vecka {getWeekNumber(currentStartDate)} (
           {formatDate(currentStartDate)} - {formatDate(currentEndDate)})
         </Typography>
         <IconButton onClick={updateWeekForward}>
-          <ChevronRightIcon />
+          <ChevronRightIcon sx={{ color: "white" }} />
         </IconButton>
       </Box>
 
@@ -169,7 +172,7 @@ export default function TodoPage() {
           sx={{
             backgroundColor: "white",
             width: { xs: "100%", md: "45%" },
-            border: "2px solid #1976d2",
+            borderRadius: 2,
             spacing: "2",
           }}
         >
@@ -323,14 +326,16 @@ export default function TodoPage() {
         <Box
           sx={{
             width: { xs: "100%", md: "45%" },
-            height: { xs: "100%", md: "45%" },
             marginY: { xs: 2, md: 0 },
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            height: "100%",
+            borderRadius: 2,
+            backgroundColor: "white",
           }}
         >
-          <Typography variant="h5" sx={{ marginY: 2 }}>
+          <Typography variant="h5" sx={{ marginY: 2, padding: 2 }}>
             Färdiga Att göra
           </Typography>
           {finishedTodos.map((todo) => (
