@@ -241,6 +241,9 @@ export default function TodoPage() {
                     <TextField
                       variant="outlined"
                       type="text"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleEditTodo();
+                      }}
                       value={editedTodo?.title}
                       onChange={(e) =>
                         setEditedTodo({ ...editedTodo, title: e.target.value })
@@ -264,6 +267,9 @@ export default function TodoPage() {
                       label="Datum"
                       type="datetime-local"
                       value={editedTodo.date}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleEditTodo();
+                      }}
                       onChange={(e) =>
                         setEditedTodo({
                           ...editedTodo,
@@ -332,6 +338,7 @@ export default function TodoPage() {
             alignItems: "center",
             height: "100%",
             borderRadius: 2,
+            overflowY: "scroll",
             backgroundColor: "white",
           }}
         >
