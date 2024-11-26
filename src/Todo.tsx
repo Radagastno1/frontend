@@ -174,6 +174,7 @@ export default function TodoPage() {
             width: { xs: "100%", md: "45%" },
             borderRadius: 2,
             spacing: "2",
+            overflowY: "scroll",
           }}
         >
           <Box
